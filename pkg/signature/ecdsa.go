@@ -20,6 +20,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -153,6 +154,7 @@ func (e ECDSAVerifier) PublicKey(_ ...PublicKeyOption) (crypto.PublicKey, error)
 //
 // All other options are ignored if specified.
 func (e ECDSAVerifier) VerifySignature(signature, message io.Reader, opts ...VerifyOption) error {
+	fmt.Printf("ECDSAVerifier\n")
 	digest, _, err := ComputeDigestForVerifying(message, e.hashFunc, ecdsaSupportedHashFuncs, opts...)
 	if err != nil {
 		return err

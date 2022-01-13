@@ -19,6 +19,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -153,6 +154,7 @@ func (r RSAPKCS1v15Verifier) PublicKey(_ ...PublicKeyOption) (crypto.PublicKey, 
 //
 // All other options are ignored if specified.
 func (r RSAPKCS1v15Verifier) VerifySignature(signature, message io.Reader, opts ...VerifyOption) error {
+	fmt.Printf("RSAPKCS1v15Verifier\n")
 	digest, hf, err := ComputeDigestForVerifying(message, r.hashFunc, rsaSupportedHashFuncs, opts...)
 	if err != nil {
 		return err

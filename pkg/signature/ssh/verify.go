@@ -16,6 +16,7 @@
 package ssh
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -51,6 +52,7 @@ var _ signature.Verifier = (*Signer)(nil)
 
 // VerifySignature verifies a suppled signature.
 func (s *Signer) VerifySignature(signature, message io.Reader, opts ...signature.VerifyOption) error {
+	fmt.Printf("sshsigner\n")
 	b, err := ioutil.ReadAll(signature)
 	if err != nil {
 		return err

@@ -20,6 +20,7 @@ import (
 	"crypto"
 	"crypto/ed25519"
 	"crypto/rand"
+	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -119,6 +120,7 @@ func (e *ED25519Verifier) PublicKey(_ ...PublicKeyOption) (crypto.PublicKey, err
 //
 // All options are ignored if specified.
 func (e *ED25519Verifier) VerifySignature(signature, message io.Reader, _ ...VerifyOption) error {
+	fmt.Printf("ED25519Verifier\n")
 	messageBytes, _, err := ComputeDigestForVerifying(message, crypto.Hash(0), ed25519SupportedHashFuncs)
 	if err != nil {
 		return err
