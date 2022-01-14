@@ -132,7 +132,7 @@ func (h SignerVerifier) PublicKey(_ ...signature.PublicKeyOption) (crypto.Public
 //
 // All other options are ignored if specified.
 func (h SignerVerifier) VerifySignature(sig, message io.Reader, opts ...signature.VerifyOption) error {
-	fmt.Printf("yasu\n")
+	fmt.Printf("yasu2\n")
 	var digest []byte
 	var signerOpts crypto.SignerOpts = h.hashFunc
 
