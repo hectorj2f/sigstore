@@ -208,6 +208,8 @@ func (h hashivaultClient) verify(sig, digest []byte, alg crypto.Hash) error {
 		vaultDataPrefix = vaultV1DataPrefix
 	}
 	fmt.Printf("value: %v", fmt.Sprintf("/%s/verify/%s/%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)))
+	fmt.Printf("input: %v", base64.StdEncoding.EncodeToString(digest))
+	fmt.Printf("signature: %v", fmt.Sprintf("%s%s", vaultDataPrefix, encodedSig))
 	result, err := client.Write(fmt.Sprintf("/%s/verify/%s/%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)), map[string]interface{}{
 		"input":     base64.StdEncoding.EncodeToString(digest),
 		"signature": fmt.Sprintf("%s%s", vaultDataPrefix, encodedSig),
