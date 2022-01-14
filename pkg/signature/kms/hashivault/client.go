@@ -180,13 +180,9 @@ func (h *hashivaultClient) public() (crypto.PublicKey, error) {
 
 func (h hashivaultClient) sign(digest []byte, alg crypto.Hash) ([]byte, error) {
 	client := h.client.Logical()
-	fmt.Printf("sign url: %v\n", fmt.Sprintf("/%s/sign/%s%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)))
-	fmt.Printf("input sign: %v", base64.StdEncoding.Strict().EncodeToString(digest))
-	fmt.Println("noprehashed")
 	signResult, err := client.Write(fmt.Sprintf("/%s/sign/%s%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)), map[string]interface{}{
 		"input": base64.StdEncoding.Strict().EncodeToString(digest),
 	})
-	fmt.Printf("prehashed: %v\n", alg != crypto.Hash(0))
 	if err != nil {
 		return nil, errors.Wrap(err, "Transit: failed to sign payload")
 	}
@@ -195,29 +191,18 @@ func (h hashivaultClient) sign(digest []byte, alg crypto.Hash) ([]byte, error) {
 	if !ok {
 		return nil, errors.New("Transit: response corrupted in-transit")
 	}
-	fmt.Printf("encodeSignatuer without: %v", encodedSignature)
 
-	final, err := vaultDecode(encodedSignature)
-	fmt.Printf("final signature: %v", string(final))
-
-	return final, err
+	return vaultDecode(encodedSignature)
 
 }
 
 func (h hashivaultClient) verify(sig, digest []byte, alg crypto.Hash) error {
-	fmt.Println("Hello america")
 	client := h.client.Logical()
-	encodedSig := base64.StdEncoding.EncodeToString(sig)
-
 	vaultDataPrefix := os.Getenv("VAULT_KEY_PREFIX")
 	if vaultDataPrefix == "" {
 		vaultDataPrefix = vaultV1DataPrefix
 	}
-	fmt.Printf("value: %v", fmt.Sprintf("/%s/verify/%s/%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)))
-	fmt.Printf("input: %v", base64.StdEncoding.EncodeToString(digest))
-	fmt.Printf("signature: %v", fmt.Sprintf("%s%s", vaultDataPrefix, encodedSig))
-	fmt.Printf("raw sig: %v", string(sig))
-	fmt.Printf("signature without encoding: %v", fmt.Sprintf("%s%s", vaultDataPrefix, sig))
+
 	result, err := client.Write(fmt.Sprintf("/%s/verify/%s/%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)), map[string]interface{}{
 		"input":     base64.StdEncoding.EncodeToString(digest),
 		"signature": fmt.Sprintf("%s%s", vaultDataPrefix, sig),
@@ -233,7 +218,7 @@ func (h hashivaultClient) verify(sig, digest []byte, alg crypto.Hash) error {
 	}
 	fmt.Printf("result.Data: %v", result.Data)
 
-	if isValid, ok := valid.(bool); ok && isValid {
+	if isValid, ok := valid.(bool); ok && !isValid {
 		return errors.New("Failed vault verification")
 	}
 	return nil

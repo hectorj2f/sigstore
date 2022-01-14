@@ -18,7 +18,6 @@ package hashivault
 import (
 	"context"
 	"crypto"
-	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -132,7 +131,6 @@ func (h SignerVerifier) PublicKey(_ ...signature.PublicKeyOption) (crypto.Public
 //
 // All other options are ignored if specified.
 func (h SignerVerifier) VerifySignature(sig, message io.Reader, opts ...signature.VerifyOption) error {
-	fmt.Printf("yasu2\n")
 	var digest []byte
 	var signerOpts crypto.SignerOpts = h.hashFunc
 
