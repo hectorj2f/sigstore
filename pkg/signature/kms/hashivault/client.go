@@ -180,11 +180,12 @@ func (h *hashivaultClient) public() (crypto.PublicKey, error) {
 
 func (h hashivaultClient) sign(digest []byte, alg crypto.Hash) ([]byte, error) {
 	client := h.client.Logical()
-
+	fmt.Printf("sign url: %v\n", fmt.Sprintf("/%s/sign/%s%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)))
 	signResult, err := client.Write(fmt.Sprintf("/%s/sign/%s%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)), map[string]interface{}{
 		"input":     base64.StdEncoding.Strict().EncodeToString(digest),
 		"prehashed": alg != crypto.Hash(0),
 	})
+	fmt.Printf("prehashed: %v\n", alg != crypto.Hash(0))
 	if err != nil {
 		return nil, errors.Wrap(err, "Transit: failed to sign payload")
 	}
@@ -217,7 +218,7 @@ func (h hashivaultClient) verify(sig, digest []byte, alg crypto.Hash) error {
 	fmt.Printf("signature without encoding: %v", fmt.Sprintf("%s%s", vaultDataPrefix, sig))
 	result, err := client.Write(fmt.Sprintf("/%s/verify/%s/%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)), map[string]interface{}{
 		"input":     base64.StdEncoding.EncodeToString(digest),
-		"signature": fmt.Sprintf("%s%s", vaultDataPrefix, sig),
+		"signature": fmt.Sprintf("%s%s", vaultDataPrefix, encodedSig),
 	})
 
 	if err != nil {
@@ -243,7 +244,7 @@ func vaultDecode(data interface{}) ([]byte, error) {
 		return nil, errors.New("Received non-string data")
 	}
 
-	return []byte(prefixRegex.ReplaceAllString(encoded, "")), nil
+	return base64.StdEncoding.DecodeString(prefixRegex.ReplaceAllString(encoded, ""))
 }
 
 func hashString(h crypto.Hash) string {
