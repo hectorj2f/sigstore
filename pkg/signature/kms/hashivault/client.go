@@ -182,9 +182,9 @@ func (h hashivaultClient) sign(digest []byte, alg crypto.Hash) ([]byte, error) {
 	client := h.client.Logical()
 	fmt.Printf("sign url: %v\n", fmt.Sprintf("/%s/sign/%s%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)))
 	fmt.Printf("input sign: %v", base64.StdEncoding.Strict().EncodeToString(digest))
+	fmt.Println("noprehashed")
 	signResult, err := client.Write(fmt.Sprintf("/%s/sign/%s%s", h.transitSecretEnginePath, h.keyPath, hashString(alg)), map[string]interface{}{
-		"input":     base64.StdEncoding.Strict().EncodeToString(digest),
-		"prehashed": alg != crypto.Hash(0),
+		"input": base64.StdEncoding.Strict().EncodeToString(digest),
 	})
 	fmt.Printf("prehashed: %v\n", alg != crypto.Hash(0))
 	if err != nil {
