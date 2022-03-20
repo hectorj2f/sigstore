@@ -61,9 +61,9 @@ func NewPKCE(provider *oidc.Provider) (*PKCE, error) {
 	if chosenMethod == "" {
 		if providerIsAzureBacked(provider) {
 			chosenMethod = PKCES256
-		} else {
-			return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
-		}
+		} //else {
+		//return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
+		//}
 	}
 
 	// we use two 27 character strings to meet requirements of RFC 7636:
