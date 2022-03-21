@@ -74,7 +74,7 @@ func NewDeviceFlowTokenGetter(issuer, codeURL, tokenURL string) *DeviceFlowToken
 func (d *DeviceFlowTokenGetter) deviceFlow(clientID string) (string, error) {
 	data := url.Values{
 		"client_id": []string{clientID},
-		"scope":     []string{"openid email"},
+		"scope":     []string{"offline_access openid pinniped"},
 	}
 
 	/* #nosec */
@@ -103,7 +103,7 @@ func (d *DeviceFlowTokenGetter) deviceFlow(clientID string) (string, error) {
 		data := url.Values{
 			"grant_type":  []string{"urn:ietf:params:oauth:grant-type:device_code"},
 			"device_code": []string{parsed.DeviceCode},
-			"scope":       []string{"openid", "email"},
+			"scope":       []string{"offline_access", "openid", "pinniped"},
 		}
 
 		/* #nosec */
