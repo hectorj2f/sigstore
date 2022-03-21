@@ -51,12 +51,12 @@ func startRedirectListener(state, htmlPage string, codeCh chan string, errCh cha
 		return nil, nil, err
 	}
 
-	port := listener.Addr().(*net.TCPAddr).Port
+	//port := listener.Addr().(*net.TCPAddr).Port
 
 	url := &url.URL{
 		Scheme: "http",
-		Host:   fmt.Sprintf("localhost:%d", port),
-		Path:   "/auth/callback",
+		Host:   fmt.Sprintf("127.0.0.1:%d", 0),
+		Path:   "/callback",
 	}
 
 	m := http.NewServeMux()
