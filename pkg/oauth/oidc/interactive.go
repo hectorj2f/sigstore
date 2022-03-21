@@ -31,7 +31,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const oobRedirectURI = "urn:ietf:wg:oauth:2.0:oob"
+//const oobRedirectURI = "urn:ietf:wg:oauth:2.0:oob"
+const oobRedirectURI = "http://127.0.0.1:0/callback"
 
 type browserOpener func(url string) error
 
