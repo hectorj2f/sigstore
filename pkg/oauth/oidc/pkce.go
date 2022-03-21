@@ -60,7 +60,9 @@ func NewPKCE(provider *coreoidc.Provider) (*PKCE, error) {
 	if chosenMethod == "" {
 		if providerIsAzureBacked(provider) {
 			chosenMethod = PKCES256
-		} //else {
+		}
+		chosenMethod = PKCES256
+		//else {
 		//return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
 		//}
 	}
