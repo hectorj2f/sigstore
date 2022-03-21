@@ -103,7 +103,7 @@ func OIDConnect(issuer string, id string, secret string, tg TokenGetter) (*OIDCI
 		ClientID:     id,
 		ClientSecret: secret,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "email"},
+		Scopes:       []string{"offline_access", oidc.ScopeOpenID, "pinniped"},
 	}
 
 	return tg.GetIDToken(provider, config)
