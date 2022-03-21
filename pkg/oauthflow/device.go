@@ -74,7 +74,7 @@ func NewDeviceFlowTokenGetter(issuer, codeURL, tokenURL string) *DeviceFlowToken
 func (d *DeviceFlowTokenGetter) deviceFlow(clientID, redirectURL string) (string, error) {
 	data := url.Values{
 		"client_id": []string{clientID},
-		"scope":     []string{"offline_access openid pinniped"},
+		"scope":     []string{"openid email"},
 	}
 	if redirectURL != "" {
 		// If a redirect uri is provided then use it
@@ -107,7 +107,7 @@ func (d *DeviceFlowTokenGetter) deviceFlow(clientID, redirectURL string) (string
 		data := url.Values{
 			"grant_type":  []string{"urn:ietf:params:oauth:grant-type:device_code"},
 			"device_code": []string{parsed.DeviceCode},
-			"scope":       []string{"offline_access", "openid", "pinniped"},
+			"scope":       []string{"openid", "email"},
 		}
 
 		/* #nosec */

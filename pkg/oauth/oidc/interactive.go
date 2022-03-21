@@ -58,11 +58,11 @@ func startRedirectListener(state, htmlPage, redirectURL string, codeCh chan stri
 			return nil, nil, err
 		}
 
-		port := listener.Addr().(*net.TCPAddr).Port
+		//port := listener.Addr().(*net.TCPAddr).Port HECTOR: commented
 		urlListener = &url.URL{
 			Scheme: "http",
-			Host:   fmt.Sprintf("localhost:%d", port),
-			Path:   "/auth/callback",
+			Host:   fmt.Sprintf("127.0.0.1:%d", 0), // HECTOR: changed from "localhost:%d", port" to ""127.0.0.1:%d", 0"
+			Path:   "/callback",                    // HECTOR: changed from "/auth/callback" to "/callback"
 		}
 	} else {
 		urlListener, err = url.Parse(redirectURL)
