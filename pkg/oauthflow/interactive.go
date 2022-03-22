@@ -76,7 +76,6 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 	}
 	authCodeURL := cfg.AuthCodeURL(stateToken, opts...)
 	var code string
-	fmt.Fprintf(os.Stderr, "Here we go! %v\n", authCodeURL)
 	if err := browserOpener(authCodeURL); err != nil {
 		// Swap to the out of band flow if we can't open the browser
 		fmt.Fprintf(os.Stderr, "error opening browser: %v\n", err)
