@@ -72,7 +72,7 @@ func NewDeviceFlowTokenGetter(issuer, codeURL, tokenURL string) *DeviceFlowToken
 }
 
 func (d *DeviceFlowTokenGetter) deviceFlow(clientID, redirectURI string) (string, error) {
-
+	fmt.Printf("clientID :%v and redirectURI %v", clientID, redirectURI)
 	data := url.Values{
 		"client_id": []string{clientID},
 		"scope":     []string{"openid email"},
