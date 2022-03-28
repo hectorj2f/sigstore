@@ -78,6 +78,7 @@ func (d *DeviceFlowTokenGetter) deviceFlow(clientID, redirectURI string) (string
 		"scope":     []string{"openid email"},
 	}
 	if redirectURI != "" {
+		// If a redirect uri is provided then use it
 		data["redirect_uri"] = []string{redirectURI}
 	}
 
