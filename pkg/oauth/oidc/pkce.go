@@ -19,6 +19,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"regexp"
+	"strings"
 
 	coreoidc "github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -31,9 +32,10 @@ const (
 
 // PKCE specifies the challenge and value pair required to fulfill RFC7636
 type PKCE struct {
-	Challenge string
-	Method    string
-	Value     string
+	Challenge              string
+	Method                 string
+	Value                  string
+	ResponseModesSupported []string
 }
 
 // NewPKCE creates a new PKCE challenge for the specified provider per its supported methods (obtained through OIDC discovery endpoint)
@@ -41,6 +43,7 @@ func NewPKCE(provider *coreoidc.Provider) (*PKCE, error) {
 	var providerClaims struct {
 		CodeChallengeMethodsSupported    []string `json:"code_challenge_methods_supported"`
 		IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
+		ResponseModesSupported           []string `json:"response_modes_supported"`
 	}
 
 	fmt.Printf("provider %v\n", provider)
@@ -84,19 +87,23 @@ func NewPKCE(provider *coreoidc.Provider) (*PKCE, error) {
 	challenge := base64.RawURLEncoding.EncodeToString(h[:])
 
 	return &PKCE{
-		Challenge: challenge,
-		Method:    chosenMethod,
-		Value:     value,
+		Challenge:              challenge,
+		Method:                 chosenMethod,
+		Value:                  value,
+		ResponseModesSupported: providerClaims.ResponseModesSupported,
 	}, nil
 }
 
 // AuthURLOpts returns the set of request parameters required during the initial exchange of the OAuth2 flow
 func (p *PKCE) AuthURLOpts() []oauth2.AuthCodeOption {
-	return []oauth2.AuthCodeOption{
+	opts := []oauth2.AuthCodeOption{
 		oauth2.SetAuthURLParam("code_challenge_method", p.Method),
-		oauth2.SetAuthURLParam("response_mode", "form_post"),
 		oauth2.SetAuthURLParam("code_challenge", p.Challenge),
 	}
+	if len(p.ResponseModesSupported) > 0 {
+		opts = append(opts, oauth2.SetAuthURLParam("response_mode", strings.Join(p.ResponseModesSupported[:], "+")))
+	}
+	return opts
 }
 
 // TokenURLOpts returns the set of request parameters required during the token request exchange flow
