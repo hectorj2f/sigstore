@@ -39,7 +39,8 @@ type PKCE struct {
 // NewPKCE creates a new PKCE challenge for the specified provider per its supported methods (obtained through OIDC discovery endpoint)
 func NewPKCE(provider *coreoidc.Provider) (*PKCE, error) {
 	var providerClaims struct {
-		CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported"`
+		CodeChallengeMethodsSupported    []string `json:"code_challenge_methods_supported"`
+		IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
 	}
 
 	fmt.Printf("provider %v\n", provider)
@@ -65,12 +66,15 @@ func NewPKCE(provider *coreoidc.Provider) (*PKCE, error) {
 			chosenMethod = PKCES256
 		}
 
-		chosenMethod = PKCES256
-		//else {
-		//	return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
-		//}
+		for _, method := range providerClaims.IDTokenSigningAlgValuesSupported {
+			if method == "ES256" {
+				chosenMethod = PKCES256
+			}
+		}
+		if chosenMethod == "" {
+			return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
+		}
 	}
-	chosenMethod = PKCES256
 
 	// we use two 27 character strings to meet requirements of RFC 7636:
 	// (minimum length of 43 characters and a maximum length of 128 characters)

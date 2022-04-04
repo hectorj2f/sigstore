@@ -168,6 +168,8 @@ func (idts *interactiveIDTokenSource) IDToken(ctx context.Context) (*IDToken, er
 		opts = append(opts, idts.extraAuthCodeOpts...)
 	}
 	authCodeURL := cfg.AuthCodeURL(stateToken, opts...)
+	fmt.Printf("Printing for me %v", authCodeURL)
+
 	var code string
 	if err := idts.browser(authCodeURL); err != nil {
 		// Swap to the out of band flow if we can't open the browser
