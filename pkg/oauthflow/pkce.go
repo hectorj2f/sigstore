@@ -91,6 +91,7 @@ func NewPKCE(provider *oidc.Provider) (*PKCE, error) {
 func (p *PKCE) AuthURLOpts() []oauth2.AuthCodeOption {
 	return []oauth2.AuthCodeOption{
 		oauth2.SetAuthURLParam("code_challenge_method", p.Method),
+		oauth2.SetAuthURLParam("response_mode", "form_post"),
 		oauth2.SetAuthURLParam("code_challenge", p.Challenge),
 	}
 }
