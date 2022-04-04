@@ -43,6 +43,8 @@ func NewPKCE(provider *oidc.Provider) (*PKCE, error) {
 		CodeChallengeMethodsSupported []string `json:"code_challenge_methods_supported"`
 	}
 
+	fmt.Printf("provider %v\n", provider)
+
 	if err := provider.Claims(&providerClaims); err != nil {
 		// will only error out if the JSON was malformed, which shouldn't happen at this point
 		return nil, err
@@ -58,13 +60,17 @@ func NewPKCE(provider *oidc.Provider) (*PKCE, error) {
 			fmt.Printf("Unsupported code challenge method in list: '%v'", method)
 		}
 	}
+	fmt.Printf("claims %v:\n", providerClaims)
 	if chosenMethod == "" {
 		if providerIsAzureBacked(provider) {
 			chosenMethod = PKCES256
-		} else {
-			return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
 		}
+		chosenMethod = PKCES256
+		//else {
+		//	return nil, fmt.Errorf("PKCE is not supported by OIDC provider '%v'", provider.Endpoint().AuthURL)
+		//}
 	}
+	chosenMethod = PKCES256
 
 	// we use two 27 character strings to meet requirements of RFC 7636:
 	// (minimum length of 43 characters and a maximum length of 128 characters)
