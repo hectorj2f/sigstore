@@ -48,9 +48,10 @@ type subjectPublicKeyInfo struct {
 
 // UnmarshalPEMToPublicKey converts a PEM-encoded byte slice into a crypto.PublicKey
 func UnmarshalPEMToPublicKey(pemBytes []byte) (crypto.PublicKey, error) {
+
 	derBytes, _ := pem.Decode(pemBytes)
 	if derBytes == nil {
-		return nil, errors.New("PEM decoding failed")
+		return nil, errors.New(fmt.Sprintf("PEM decoding failed: %v", string(pemBytes)))
 	}
 	return x509.ParsePKIXPublicKey(derBytes.Bytes)
 }
