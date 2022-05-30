@@ -17,10 +17,14 @@ package oauthflow
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -97,8 +101,27 @@ var PublicInstanceMicrosoftIDTokenGetter = &InteractiveIDTokenGetter{
 func OIDConnect(issuer string, id string, secret string, tg TokenGetter) (*OIDCIDToken, error) {
 
 	fmt.Println("OIDConnect -- NewProrvider")
-	fmt.Println(issuer)
-	provider, err := oidc.NewProvider(context.Background(), issuer)
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+	}
+
+	var client *http.Client
+	client = &http.Client{
+		Transport: transport,
+	}
+	clientctx := oidc.ClientContext(context.Background(), client)
+	provider, err := oidc.NewProvider(clientctx, issuer)
 	if err != nil {
 		return nil, err
 	}
