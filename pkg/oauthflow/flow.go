@@ -17,10 +17,14 @@ package oauthflow
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	soauth "github.com/sigstore/sigstore/pkg/oauth"
@@ -88,7 +92,27 @@ var PublicInstanceMicrosoftIDTokenGetter = &InteractiveIDTokenGetter{
 // OIDConnect requests an OIDC Identity Token from the specified issuer using the specified client credentials and TokenGetter
 // NOTE: If the redirectURL is empty a listener on localhost:0 is configured with '/auth/callback' as default path.
 func OIDConnect(issuer string, id string, secret string, redirectURL string, tg TokenGetter) (*OIDCIDToken, error) {
-	provider, err := oidc.NewProvider(context.Background(), issuer)
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+	}
+
+	var client *http.Client
+	client = &http.Client{
+		Transport: transport,
+	}
+	clientctx := oidc.ClientContext(context.Background(), client)
+	provider, err := oidc.NewProvider(clientctx, issuer)
 	if err != nil {
 		return nil, err
 	}
