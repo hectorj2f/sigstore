@@ -106,6 +106,8 @@ func OIDConnect(issuer string, id string, secret string, tg TokenGetter) (*OIDCI
 		Scopes:       []string{oidc.ScopeOpenID, "email"},
 	}
 
+	fmt.Println("OIDConnect -- etIDToken")
+
 	return tg.GetIDToken(provider, config)
 }
 

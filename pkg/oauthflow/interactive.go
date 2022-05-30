@@ -51,6 +51,7 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 
 	doneCh := make(chan string)
 	errCh := make(chan error)
+	fmt.Println("arriving here GetIDToken")
 	// starts listener on ephemeral port
 	redirectServer, redirectURL, err := startRedirectListener(stateToken, i.HTMLPage, doneCh, errCh)
 	if err != nil {
@@ -63,7 +64,7 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 	}()
 
 	cfg.RedirectURL = redirectURL.String()
-
+	fmt.Println("arriving here NewPKCE")
 	// require that OIDC provider support PKCE to provide sufficient security for the CLI
 	pkce, err := NewPKCE(p)
 	if err != nil {
@@ -74,6 +75,7 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 	if len(i.ExtraAuthURLParams) > 0 {
 		opts = append(opts, i.ExtraAuthURLParams...)
 	}
+	fmt.Println("arriving here AuthCodeURL")
 	authCodeURL := cfg.AuthCodeURL(stateToken, opts...)
 	var code string
 	if err := browserOpener(authCodeURL); err != nil {
@@ -88,6 +90,7 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 			code = doOobFlow(&cfg, stateToken, opts)
 		}
 	}
+	fmt.Println("arriving here Exchange")
 	token, err := cfg.Exchange(context.Background(), code, append(pkce.TokenURLOpts(), oidc.Nonce(nonce))...)
 	if err != nil {
 		return nil, err
@@ -98,7 +101,7 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 	if !ok {
 		return nil, errors.New("id_token not present")
 	}
-
+	fmt.Println("arriving here Verifier")
 	// verify nonce, client ID, access token hash before using it
 	verifier := p.Verifier(&oidc.Config{ClientID: cfg.ClientID})
 	parsedIDToken, err := verifier.Verify(context.Background(), idToken)
