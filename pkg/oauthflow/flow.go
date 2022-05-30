@@ -95,6 +95,8 @@ var PublicInstanceMicrosoftIDTokenGetter = &InteractiveIDTokenGetter{
 
 // OIDConnect requests an OIDC Identity Token from the specified issuer using the specified client credentials and TokenGetter
 func OIDConnect(issuer string, id string, secret string, tg TokenGetter) (*OIDCIDToken, error) {
+
+	fmt.Println("OIDConnect -- NewProrvider")
 	provider, err := oidc.NewProvider(context.Background(), issuer)
 	if err != nil {
 		return nil, err
