@@ -16,6 +16,7 @@ package oidc
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -184,13 +185,33 @@ func (idts *interactiveIDTokenSource) IDToken(ctx context.Context) (*IDToken, er
 			code = doOobFlow(&cfg, stateToken, opts)
 		}
 	}
-	token, err := cfg.Exchange(ctx, code, append(pkce.TokenURLOpts(), coreoidc.Nonce(nonce))...)
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+	}
+
+	var client *http.Client
+	client = &http.Client{
+		Transport: transport,
+	}
+	clientctx := coreoidc.ClientContext(ctx, client)
+	token, err := cfg.Exchange(clientctx, code, append(pkce.TokenURLOpts(), coreoidc.Nonce(nonce))...)
 	if err != nil {
 		return nil, err
 	}
 
 	verifier := p.Verifier(&coreoidc.Config{ClientID: cfg.ClientID})
-	return extractAndVerifyIDToken(ctx, token, verifier, nonce)
+	return extractAndVerifyIDToken(clientctx, token, verifier, nonce)
 }
 
 // InteractiveIDTokenSource returns an `IDTokenSource` which performs an interactive Oauth token flow in order to retrieve an `IDToken`.

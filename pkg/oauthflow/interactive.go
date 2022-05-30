@@ -17,6 +17,7 @@ package oauthflow
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -88,7 +89,27 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 			code = doOobFlow(&cfg, stateToken, opts)
 		}
 	}
-	token, err := cfg.Exchange(context.Background(), code, append(pkce.TokenURLOpts(), oidc.Nonce(nonce))...)
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+	}
+
+	var client *http.Client
+	client = &http.Client{
+		Transport: transport,
+	}
+	clientctx := oidc.ClientContext(context.Background(), client)
+	token, err := cfg.Exchange(clientctx, code, append(pkce.TokenURLOpts(), oidc.Nonce(nonce))...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +122,7 @@ func (i *InteractiveIDTokenGetter) GetIDToken(p *oidc.Provider, cfg oauth2.Confi
 
 	// verify nonce, client ID, access token hash before using it
 	verifier := p.Verifier(&oidc.Config{ClientID: cfg.ClientID})
-	parsedIDToken, err := verifier.Verify(context.Background(), idToken)
+	parsedIDToken, err := verifier.Verify(clientctx, idToken)
 	if err != nil {
 		return nil, err
 	}
