@@ -128,7 +128,7 @@ func OIDConnect(issuer string, id string, secret string, redirectURL string, tg 
 }
 
 type claims struct {
-	Email    string `json:"email"`
+	Email    string `json:"username"`
 	Verified bool   `json:"email_verified"`
 	Subject  string `json:"sub"`
 }
@@ -144,9 +144,9 @@ func SubjectFromToken(tok *oidc.IDToken) (string, error) {
 
 func subjectFromClaims(c claims) (string, error) {
 	if c.Email != "" {
-		if !c.Verified {
-			return "", errors.New("not verified by identity provider")
-		}
+		// if !c.Verified {
+		// 	return "", errors.New("not verified by identity provider")
+		// }
 		return c.Email, nil
 	}
 
