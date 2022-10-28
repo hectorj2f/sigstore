@@ -54,7 +54,7 @@ const (
 
 var (
 	// singletonTUF holds a single instance of TUF that will get reused on
-	// subsequent invocations of initializeTUF
+	// subsequent invocations of InitializeTUF
 	singletonTUF     *TUF
 	singletonTUFOnce = new(sync.Once)
 	singletonTUFErr  error
@@ -229,7 +229,7 @@ func GetRootStatus(ctx context.Context) (*RootStatus, error) {
 	return t.getRootStatus()
 }
 
-// initializeTUF creates a TUF client using the following params:
+// InitializeTUF creates a TUF client using the following params:
 // * embed: indicates using the embedded metadata and in-memory file updates.
 // When this is false, this uses a filesystem cache.
 // * mirror: provides a reference to a remote GCS or HTTP mirror.
@@ -239,7 +239,7 @@ func GetRootStatus(ctx context.Context) (*RootStatus, error) {
 // targets in a targets/ subfolder.
 // * forceUpdate: indicates checking the remote for an update, even when the local
 // timestamp.json is up to date.
-func initializeTUF(mirror string, root []byte, embedded fs.FS, forceUpdate bool) (*TUF, error) {
+func InitializeTUF(mirror string, root []byte, embedded fs.FS, forceUpdate bool) (*TUF, error) {
 	singletonTUFOnce.Do(func() {
 		t := &TUF{
 			mirror:   mirror,
@@ -313,12 +313,12 @@ func NewFromEnv(_ context.Context) (*TUF, error) {
 	}
 
 	// Initializes a new TUF object from the local cache or defaults.
-	return initializeTUF(mirror, nil, getEmbedded(), false)
+	return InitializeTUF(mirror, nil, getEmbedded(), false)
 }
 
 func Initialize(ctx context.Context, mirror string, root []byte) error {
 	// Initialize the client. Force an update with remote.
-	if _, err := initializeTUF(mirror, root, getEmbedded(), true); err != nil {
+	if _, err := InitializeTUF(mirror, root, getEmbedded(), true); err != nil {
 		return err
 	}
 
